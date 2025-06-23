@@ -1,0 +1,8 @@
+venv/
+node/
+media/
+__pycache__/
+docker-compose.yml
+db.sqlite3
+.env
+.DS_Store
