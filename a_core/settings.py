@@ -16,7 +16,7 @@ from environ import Env
 env = Env()
 env.read_env()
 
-ENVIRONMENT = env('ENVIROMENT', default="development")
+#ENVIRONMENT = env('ENVIROMENT', default="development")
 ENVIRONMENT = "production"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,7 +38,7 @@ else:
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 #CSRF_TRUSTED_ORIGINS = [ 'https://*' ]
 
-ALLOWED_HOSTS = ['localhost','appschool-production.up.railway.app']
+ALLOWED_HOSTS = ['localhost','127.0.0.1','appschool-production.up.railway.app']
 CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app' ]
 
 #ENVIRONMENT = "development"  # Ou "production"
