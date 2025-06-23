@@ -1,0 +1,123 @@
+{% extends 'layouts/blank.html' %}
+{% block content %}
+<div class="max-w-7xl mx-auto mt-10 px-4">
+    <h1 class="text-3xl font-bold text-gray-800">Meus Tickets</h1>
+
+    <!-- Formulário de busca -->
+    <form method="get" class="mb-6 flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+      <div class="flex flex-grow w-full">
+          <input type="text" name="q" placeholder="Buscar por assunto, número, status ou categoria"
+                 value="{{ search_query }}"
+                 class="flex-grow px-4 py-2 border rounded-l-lg shadow-sm text-sm" />
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+          </button>
+      </div>
+    </form>
+
+
+    <div class="space-y-4">
+    {% if request.user.roles.all.0.role.name == "Responsável" %}
+    <div class="mt-6">
+        <a href="{% url 'ticket:create_ticket' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg">
+            Abrir novo ticket
+        </a>
+    </div>
+    {% endif %}
+        {% for ticket in tickets %}
+        <a href="{% url 'ticket:ticket_detail' ticket.id %}" class="block bg-white rounded-2xl border hover:shadow-lg transition p-4 space-y-1">
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="text-sm font-semibold">
+                        <span class="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-600 bg-indigo-100 ">Criado por:
+                        {{ ticket.parent.user.get_full_name|default:ticket.parent.user.username }}
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-400 bg-indigo-100 ">Filho(s): 
+                        {% for child in ticket.parent.children.all %}
+                            {{ child.user.first_name }} {{ child.user.last_name|default:child.user.username }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            Nenhum aluno vinculado
+                        {% endfor %}
+                        </span>
+                        {% for child in ticket.parent.children.all %}
+                            <span class="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-500 bg-indigo-100 ">
+                              {% for turma in child.classes_assigned.all %}
+                                {{ turma.grade.name }} | {{ turma.name }} {% if not forloop.last %}, {% endif %}
+                              {% empty %}
+                                Sem turma
+                              {% endfor %}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <span class="inline-flex items-center px-2 mt-4 py-1 text-sm font-medium text-teal-500 bg-teal-100 ">Número: {{ ticket.ticket_number }}</span>
+                    <h2 class="mt-4 text-lg font-semibold text-gray-800">{{ ticket.subject }}</h2>
+                    
+                    
+                </div>
+                <!-- Badge de Categoria -->
+                {% if ticket.category %}
+                <span class="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-800 bg-indigo-100 rounded-full">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM10 8a1 1 0 011 1v2a1 1 0 11-2 0V9a1 1 0 011-1z"/>
+                    </svg>
+                    {{ ticket.category.name }}
+                </span>
+                {% endif %}
+                {% if ticket.status == 'open' %}
+                <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-800 bg-green-200 rounded-full">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.293 13.707a1 1 0 011.414 0L14 9.414l-1.414-1.414L9 11.586 7.707 10.293 6.293 11.707l2 2z"/>
+                    </svg>
+                    Aberto
+                </span>
+                {% elif ticket.status == 'closed' %}
+                <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-300 rounded-full">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6 2a1 1 0 00-.993.883L5 3v14a1 1 0 001.993.117L7 17V3a1 1 0 00-1-1zm8 0a1 1 0 00-.993.883L13 3v14a1 1 0 001.993.117L15 17V3a1 1 0 00-1-1z"/>
+                    </svg>
+                    Fechado
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-200 rounded-full">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 8h4v4H8V8z"/>
+                    </svg>
+                    Em andamento
+                </span>
+                {% endif %}
+            </div>
+            <p class="text-sm text-gray-500">Criado em: {{ ticket.created_at|date:"d/m/Y H:i" }}</p>
+        </a>
+        {% empty %}
+        <div class="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="mt-4 text-gray-500">Nada encontrado</p>
+                {% if search_query or selected_category %}
+                <p class="text-sm mt-2">Tente ajustar seus filtros de busca</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    
+
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center space-x-2 mt-6">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&type={{ selected_type }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Anterior</a>
+        {% endif %}
+
+        <span class="px-3 py-1 bg-blue-500 text-white rounded">{{ page_obj.number }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&type={{ selected_type }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">Próxima</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

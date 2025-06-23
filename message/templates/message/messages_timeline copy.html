@@ -1,0 +1,202 @@
+{% extends 'layouts/blank.html' %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto mt-10 px-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Mensagens</h1>
+        <a href="{% url 'message:parent_calendar_view' %}"
+           class="inline-flex items-center px-10 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg shadow hover:bg-green-700 transition">
+            🗓️  Meus eventos
+        </a>
+    </div>
+
+    {% if filhos|length > 1 %}
+    <div class="mb-6">
+        <div class="flex flex-wrap gap-2 px-4 py-2">
+            <!-- Botão Todos -->
+            <form method="get">
+                <input type="hidden" name="filho" value="">
+                {% if request.GET.type %}<input type="hidden" name="type" value="{{ request.GET.type }}">{% endif %}
+                {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+                <button type="submit" class="flex items-center px-3 py-2 rounded-full text-sm font-medium transition
+                    {% if not filho_selecionado %} bg-blue-100 text-blue-700 shadow {% else %} bg-gray-100 text-gray-500 hover:bg-gray-200 {% endif %}"
+                    aria-pressed="{% if not filho_selecionado %}true{% else %}false{% endif %}">
+                    <img src="https://placehold.co/24x24/6B7280/FFFFFF?text=All" alt="Todos" class="w-5 h-5 rounded-full mr-2">
+                    Todos
+                </button>
+            </form>
+
+            <!-- Botões por filho -->
+            {% for filho in filhos %}
+            <form method="get">
+                <input type="hidden" name="filho" value="{{ filho.id }}">
+                {% if request.GET.type %}<input type="hidden" name="type" value="{{ request.GET.type }}">{% endif %}
+                {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+                <button type="submit" class="flex items-center px-3 py-2 rounded-full text-sm font-medium transition
+                    {% if filho_selecionado and filho_selecionado.id == filho.id %} bg-blue-100 text-blue-700 shadow {% else %} bg-gray-100 text-gray-500 hover:bg-gray-200 {% endif %}"
+                    aria-pressed="{% if filho_selecionado and filho_selecionado.id == filho.id %}true{% else %}false{% endif %}">
+                    <img src="{% if filho.user.profile.image %}{{ filho.user.profile.image.url }}{% else %}https://placehold.co/24x24/4F46E5/FFFFFF?text={{ filho.user.first_name|first|default:'F' }}{% endif %}" 
+                         alt="{{ filho.user.get_full_name|default:filho.user.username }}" class="w- h-5 rounded-full mr-2">
+                    {{ filho.user.first_name|default:filho.user.username }}
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <main class="md:col-span-3 space-y-6">
+            {% now "Y-m-d H:i" as now_str %}
+            {% for item in page_obj %}
+                {% comment %}
+                    Verifica se a mensagem está agendada para o futuro.
+                    Se scheduled_time existir e for maior que agora, não exibe.
+                {% endcomment %}
+                
+                <div class="bg-white shadow rounded-2xl border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b">
+                        <div class="flex-1 space-y-1">
+                            <div class="flex flex-wrap gap-2 text-sm">
+                                <span class="text-gray-500">Enviado por:</span>
+                                <span class="font-bold text-gray-800">{{ item.item.created_by.get_full_name|default:item.item.created_by.username }}</span>
+                                <span class="text-gray-500">| {{ item.item.created_at|date:"d M Y - H:i" }}</span>
+                            </div>
+
+                            <div class="space-y-2">
+                                {% if item.item.grades.exists %}
+                                <div class="flex flex-wrap gap-2 items-center">
+                                    <span class="text-sm text-gray-500">Série(s):</span>
+                                    {% for grade in item.item.grades.all %}
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">{{ grade.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                {% if item.item.classes.exists %}
+                                <div class="flex flex-wrap gap-2 items-center">
+                                    <span class="text-sm text-gray-500">Turma(s):</span>
+                                    {% for class in item.item.classes.all %}
+                                    <span class="px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded-full">{{ class.grade.name }} - {{ class.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                {% if not item.item.users.exists and not item.item.grades.exists and not item.item.classes.exists %}
+                                <span class="text-xs text-gray-400">Envio geral para todos</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            {% if item.item.created_by == request.user %}
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Você enviou</span>
+                            {% endif %}
+                            {% if item.item.type %}
+                            <span class="px-3 py-1 text-sm font-medium rounded-full" style="background-color: {{ item.item.type.color }}; color: white;">
+                                {{ item.item.type.name }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-3 space-y-2">
+                        <h2 class="text-xl font-semibold text-gray-900">{{ item.item.title }}</h2>
+
+                        {# Exibe o conteúdo principal se existir #}
+                        {% if item.item.context %}
+                            <p class="text-gray-700 leading-relaxed">{{ item.item.context|safe }}</p>
+                        {% endif %}
+
+                        {# Se for "Rotina diária" e tiver atividades ou tarefa, exibe #}
+                        {% if item.item.type and item.item.type.name|lower == "rotina diária" %}
+                            {% if item.item.activities %}
+                                <div class="mt-4 border-l-4 border-blue-500 bg-blue-50 p-4 rounded-md">
+                                    <h3 class="font-semibold text-blue-800 text-lg mb-2">📘 Atividades em sala</h3>
+                                    <div class="prose max-w-none text-gray-800">
+                                        {{ item.item.activities|safe }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if item.item.homework %}
+                                <div class="mt-4 border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-md">
+                                    <h3 class="font-semibold text-yellow-800 text-lg mb-2">📚 Tarefa de casa</h3>
+                                    <div class="prose max-w-none text-gray-800">
+                                        {{ item.item.homework|safe }}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                        {% endif %}
+
+                        {% if item.item.image %}
+                        <img src="{{ item.item.image.url }}" alt="Imagem da mensagem" class="rounded-lg w-full max-h-60 object-cover mt-2">
+                        {% endif %}
+                        <div class="flex justify-between items-center pt-4">
+                            {% if item.item.attachments %}
+                            <a href="{{ item.item.attachments.url }}" download class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition">
+                                📌 Baixar Anexo
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'message:parent_message_detail' item.item.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Ver detalhes →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+            {% empty %}
+            <div class="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed">
+                <p class="text-gray-500">Nenhuma mensagem encontrada</p>
+                {% if search_query or selected_type or filho_selecionado %}
+                <p class="text-sm mt-2">Tente ajustar seus filtros de busca</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Paginação -->
+            <div class="flex justify-center space-x-2 mt-6 p-4">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&type={{ selected_type }}" 
+                   class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                    Anterior
+                </a>
+                {% endif %}
+
+                <span class="px-3 py-1 bg-blue-500 text-white rounded">
+                    {{ page_obj.number }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&type={{ selected_type }}" 
+                   class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                    Próxima
+                </a>
+                {% endif %}
+            </div>
+        </main>
+
+        <aside class="md:col-span-1 bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-sm h-fit">
+            <h2 class="text-lg font-semibold mb-4">Filtros</h2>
+            <form method="GET" class="space-y-4">
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Tipo de mensagem:</label>
+                    <select name="type" id="type" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
+                        <option value="">Todos</option>
+                        {% for type in message_types %}
+                        <option value="{{ type.id }}" {% if request.GET.type == type.id|stringformat:"s" %}selected{% endif %}>{{ type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="q" class="block text-sm font-medium text-gray-700 mb-1">Buscar por texto:</label>
+                    <input type="text" name="q" id="q" value="{{ request.GET.q }}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                {% if request.GET.filho %}<input type="hidden" name="filho" value="{{ request.GET.filho }}">{% endif %}
+                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">Filtrar</button>
+            </form>
+        </aside>
+    </div>
+</div>
+
+{% endblock %}
