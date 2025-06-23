@@ -35,6 +35,10 @@ if ENVIRONMENT == 'development':
 else:
     DEBUG = False
 
+#ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+
+#CSRF_TRUSTED_ORIGINS = [ 'https://*' ]
+
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'appschool-production.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app' ]
@@ -60,8 +64,18 @@ SHARED_APPS = [
     'django_htmx',
     'a_home',
     'a_users',
+    'blog',
     'school',
+    'contact',
+    'message',
+    'books',
+    'collection',
+    'ticket',
+    'navigator',
+    'note',
     'notification',
+    'dashboard',
+    'widget_tweaks',
    
   
 ]
@@ -69,7 +83,6 @@ SHARED_APPS = [
 TENANT_APPS = [
  
     'django.contrib.auth', 
- 
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
@@ -245,7 +258,10 @@ LOGIN_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_EMAIL_REQUIRED = True
+
+#ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
 
 
 
