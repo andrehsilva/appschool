@@ -36,11 +36,9 @@ else:
     DEBUG = False
 
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
-
 #CSRF_TRUSTED_ORIGINS = [ 'https://*' ]
 
-ALLOWED_HOSTS = ['.railway.app', 'localhost', '0.0.0.0', 'appschool-production.up.railway.app']
-
+ALLOWED_HOSTS = ['localhost','appschool-production.up.railway.app']
 CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app' ]
 
 #ENVIRONMENT = "development"  # Ou "production"
