@@ -241,9 +241,18 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_S3_FILE_OVERWRITE = False
+AWS_LOCATION = 'media'
+
+
 STORAGES = {
     "default": {
-        "BACKEND": "a_home.storage.CustomSchemaStorage",
+        #"BACKEND": "a_home.storage.CustomSchemaStorage",
+        "BACKEND":"storages.backends.s3.S3Storage",
     },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
