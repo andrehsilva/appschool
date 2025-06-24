@@ -38,8 +38,11 @@ else:
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 #CSRF_TRUSTED_ORIGINS = [ 'https://*' ]
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1','appschool-production.up.railway.app']
-CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app' ]
+ALLOWED_HOSTS = ['localhost','127.0.0.1',
+                 'appschool-production.up.railway.app',
+                 '.appschool-production.up.railway.app'
+                 ]
+CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app','https://*.appschool-production.up.railway.app' ]
 
 #ENVIRONMENT = "development"  # Ou "production"
 
