@@ -40,9 +40,12 @@ else:
 
 ALLOWED_HOSTS = ['localhost','127.0.0.1',
                  'appschool-production.up.railway.app',
-                 '.appschool-production.up.railway.app'
+                 'sacadaweb.online',
+                 '.sacadaweb.online'
                  ]
-CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app','https://*.appschool-production.up.railway.app' ]
+CSRF_TRUSTED_ORIGINS = [ 'https://appschool-production.up.railway.app',
+                        'https://sacadaweb.online',
+                        'https://*.sacadaweb.online' ]
 
 #ENVIRONMENT = "development"  # Ou "production"
 
