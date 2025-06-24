@@ -248,6 +248,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 AWS_S3_FILE_OVERWRITE = False
 AWS_LOCATION = 'media'
 
+##
 
 STORAGES = {
     "default": {
